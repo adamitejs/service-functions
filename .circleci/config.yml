@@ -1,0 +1,36 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8
+
+    steps:
+      - checkout
+
+      - run:
+          name: Update NPM
+          command: "sudo npm install -g npm@5"
+
+      - run:
+          name: Set Private Registry
+          command: "npm config set registry http://venus.hydr.io:4873/"
+
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+
+      - run:
+          name: Install Dependencies
+          command: npm install
+
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+
+      - run:
+          name: Run Tests
+          command: npm test
+
+      - run:
+          name: Collect Code Coverage
+          command: "npx codecov"
