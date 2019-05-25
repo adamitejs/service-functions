@@ -23,7 +23,7 @@ class FunctionsService {
     this.server.command("functions.invoke", async (client, args, callback) => {
       if (commands[args.name]) {
         try {
-          const returnValue = await commands[args.name](client, args);
+          const returnValue = await commands[args.name](client, args.args);
           callback({ error: false, returnValue });
         } catch (err) {
           console.error(err);
