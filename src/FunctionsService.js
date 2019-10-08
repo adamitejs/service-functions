@@ -20,10 +20,26 @@ class FunctionsService {
   registerCommands() {
     const commands = this.config.functions.root;
 
+    const allFunctions = Object.keys(commands).map(commandName => ({
+      name: commandName,
+      type: commands[commandName].constructor.name,
+      command: commands[commandName]
+    }));
+
+    const invokableFunctions = allFunctions.filter(fn => fn.type === "InvokableFunction");
+    const runtimeFunctions = allFunctions.filter(fn => fn.type === "RuntimeFunction");
+
+    this.handleInvokableFunctions(invokableFunctions);
+    this.handleRuntimeFunctions(runtimeFunctions);
+  }
+
+  handleInvokableFunctions(functions) {
     this.server.command("functions.invoke", async (client, args, callback) => {
-      if (commands[args.name]) {
+      const matchingFunction = functions.find(fn => fn.name === args.name);
+
+      if (matchingFunction) {
         try {
-          const returnValue = await commands[args.name](client, args.args);
+          const returnValue = await matchingFunction.command.handler(args.args, { client, service: this });
           callback({ error: false, returnValue });
         } catch (err) {
           console.error(err);
@@ -33,6 +49,10 @@ class FunctionsService {
         callback({ error: `Function ${args.name} does not exist.` });
       }
     });
+  }
+
+  handleRuntimeFunctions(functions) {
+    functions.forEach(fn => fn.command.handler({ service: this }));
   }
 
   start() {

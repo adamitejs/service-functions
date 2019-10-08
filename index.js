@@ -5,3 +5,6 @@ module.exports = function(config) {
   service.start();
   return service;
 };
+
+module.exports.InvokableFunction = require("./src/InvokableFunction");
+module.exports.RuntimeFunction = require("./src/RuntimeFunction");
