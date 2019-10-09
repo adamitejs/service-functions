@@ -8,3 +8,4 @@ module.exports = function(config) {
 
 module.exports.InvokableFunction = require("./src/InvokableFunction");
 module.exports.RuntimeFunction = require("./src/RuntimeFunction");
+module.exports.ScheduledFunction = require("./src/ScheduledFunction");

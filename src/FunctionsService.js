@@ -1,6 +1,7 @@
 const adamite = require("@adamite/sdk").default;
 const { DatabasePlugin, AuthPlugin } = require("@adamite/sdk");
 const server = require("@adamite/relay-server").default;
+const cron = require("node-cron");
 
 class FunctionsService {
   constructor(config) {
@@ -28,9 +29,11 @@ class FunctionsService {
 
     const invokableFunctions = allFunctions.filter(fn => fn.type === "InvokableFunction");
     const runtimeFunctions = allFunctions.filter(fn => fn.type === "RuntimeFunction");
+    const scheduledFunctions = allFunctions.filter(fn => fn.type === "ScheduledFunction");
 
     this.handleInvokableFunctions(invokableFunctions);
     this.handleRuntimeFunctions(runtimeFunctions);
+    this.handleScheduledFunctions(scheduledFunctions);
   }
 
   handleInvokableFunctions(functions) {
@@ -53,6 +56,14 @@ class FunctionsService {
 
   handleRuntimeFunctions(functions) {
     functions.forEach(fn => fn.command.handler({ service: this }));
+  }
+
+  handleScheduledFunctions(functions) {
+    functions.forEach(fn =>
+      cron.schedule(fn.command.schedule, () => {
+        fn.command.handler({ service: this });
+      })
+    );
   }
 
   start() {
