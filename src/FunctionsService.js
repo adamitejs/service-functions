@@ -6,7 +6,10 @@ const cron = require("node-cron");
 class FunctionsService {
   constructor(config) {
     this.config = config;
-    this.server = server({ apiUrl: "http://localhost:9000", port: 9003 }, this.config);
+    this.server = server(
+      { name: "functions", apiUrl: this.config.apiUrl || "http://localhost:9000", port: this.config.port || 9003 },
+      this.config
+    );
     this.initializeAdamite();
     this.registerCommands();
   }
@@ -15,11 +18,11 @@ class FunctionsService {
     adamite()
       .use(DatabasePlugin)
       .use(AuthPlugin)
-      .initializeApp(this.config.functions.sdk);
+      .initializeApp(this.config.sdk);
   }
 
   registerCommands() {
-    const commands = this.config.functions.root;
+    const commands = this.config.root;
 
     const allFunctions = Object.keys(commands).map(commandName => ({
       name: commandName,
