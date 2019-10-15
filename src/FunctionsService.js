@@ -2,6 +2,7 @@ const adamite = require("@adamite/sdk").default;
 const { DatabasePlugin, AuthPlugin } = require("@adamite/sdk");
 const server = require("@adamite/relay-server").default;
 const cron = require("node-cron");
+const chalk = require("chalk");
 
 class FunctionsService {
   constructor(config) {
@@ -15,6 +16,15 @@ class FunctionsService {
   }
 
   initializeAdamite() {
+    if (!this.config.sdk || Object.keys(this.config.sdk).length === 0) {
+      console.warn(
+        chalk.yellow(
+          "Warning: The SDK configuration is missing or empty. You will not be able to access your Adamite database within functions."
+        )
+      );
+      return;
+    }
+
     adamite()
       .use(DatabasePlugin)
       .use(AuthPlugin)
