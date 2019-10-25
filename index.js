@@ -1,7 +1,7 @@
 const FunctionsService = require("./src/FunctionsService");
 
-module.exports = function(config) {
-  const service = new FunctionsService(config);
+module.exports = function(config, rootConfig) {
+  const service = new FunctionsService(config, rootConfig);
   service.start();
   return service;
 };

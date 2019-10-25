@@ -5,11 +5,13 @@ const cron = require("node-cron");
 const chalk = require("chalk");
 
 class FunctionsService {
-  constructor(config) {
+  constructor(config, rootConfig) {
     this.config = config;
+    this.rootConfig = rootConfig;
     this.server = server(
       { name: "functions", apiUrl: this.config.apiUrl || "http://localhost:9000", port: this.config.port || 9003 },
-      this.config
+      this.config,
+      rootConfig
     );
     this.initializeAdamite();
     this.registerCommands();
