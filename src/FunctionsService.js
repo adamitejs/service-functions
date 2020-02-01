@@ -1,19 +1,14 @@
 const adamite = require("@adamite/sdk").default;
 const { DatabasePlugin, AuthPlugin } = require("@adamite/sdk");
-const server = require("@adamite/relay-server").default;
 const cron = require("node-cron");
 const chalk = require("chalk");
 
 class FunctionsService {
-  constructor(config, rootConfig) {
+  constructor(server, config, rootConfig) {
     this.config = config;
     this.rootConfig = rootConfig;
-    this.server = server(
-      { name: "functions", apiUrl: this.config.apiUrl || "http://localhost:9000", port: this.config.port || 9003 },
-      this.config,
-      rootConfig
-    );
-    this.initializeAdamite();
+    this.server = server;
+    // this.initializeAdamite();
     this.registerCommands();
   }
 
@@ -52,19 +47,14 @@ class FunctionsService {
   }
 
   handleInvokableFunctions(functions) {
-    this.server.command("functions.invoke", async (client, args, callback) => {
+    this.server.command("functions.invoke", async (client, args) => {
       const matchingFunction = functions.find(fn => fn.name === args.name);
 
       if (matchingFunction) {
-        try {
-          const returnValue = await matchingFunction.command.handler(args.args, { client, service: this });
-          callback({ error: false, returnValue });
-        } catch (err) {
-          console.error(err);
-          callback({ error: err.message });
-        }
+        const returnValue = await matchingFunction.command.handler(args.args, { client, service: this });
+        return returnValue;
       } else {
-        callback({ error: `Function ${args.name} does not exist.` });
+        throw new Error(`Function ${args.name} does not exist.`);
       }
     });
   }
@@ -79,10 +69,6 @@ class FunctionsService {
         fn.command.handler({ service: this });
       })
     );
-  }
-
-  start() {
-    this.server.start();
   }
 }
 
